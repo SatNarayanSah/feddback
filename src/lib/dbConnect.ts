@@ -8,7 +8,7 @@ type ConnectionObject = {
 
 const connections: ConnectionObject = {}
 
-async function dbConnect(): Promise<void> {
+async function dbConnect(): Promise<void> {  
     if (connections.isConnected) {
         console.log("Already Connected to datase");
         return
