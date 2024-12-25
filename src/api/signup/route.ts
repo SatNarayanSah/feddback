@@ -3,6 +3,7 @@ import UserModel from "@/model/User";
 import bcrypt from 'bcryptjs'
 import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
 
+
 export async function POST(request: Request) {
     await dbConnect()
 
@@ -20,7 +21,18 @@ export async function POST(request: Request) {
         const exitstingUserByEmail = await UserModel.findOne({ email })
         const verifyCode = Math.floor(1000000 + Math.random() * 9000000).toString()
         if (exitstingUserByEmail) {
-            
+            if (exitstingUserByEmail.isVerified) {
+                return Response.json({
+                    success: false,
+                    message: "User already exist with this email"
+                }, { status: 400 })
+            } else {
+                const hasedPassword = await bcrypt.hash(password, 10)
+                exitstingUserByEmail.password = hasedPassword;
+                exitstingUserByEmail.VerifyCode = verifyCode;
+                exitstingUserByEmail.verifyCodeExpiry = new Date(Date.now() + 3600000)
+                await exitstingUserByEmail.save()
+            }
         } else {
             const hasedPassword = await bcrypt.hash(password, 10)
             const expiryDate = new Date()
